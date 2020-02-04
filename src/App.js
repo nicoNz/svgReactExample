@@ -1,14 +1,10 @@
 import React from 'react';
-import logo from './logo.svg';
-import {Row} from 'reactstrap'
 
 import MySvg from './components/SVG/MySvg'
 import MyUi from './components/UI/MyUi'
 
 import './App.css';
 
-const CANVAS_WIDTH = 600
-const CANVAS_HEIGHT = 400
 
 function createRandomColor() {
   var letters = '0123456789ABCDEF';
@@ -28,7 +24,7 @@ function createRandomCircle() {
       color : createRandomColor(),
       position : {
         x : Math.random()*20+10, 
-        y : Math.random()*20+10
+        y : Math.random()*10+15
       },
       data : {
         things : Math.random()*10,
@@ -40,20 +36,7 @@ function createRandomCircle() {
 
 const INITIAL_STATE = {
   drag : null,
-  /*
-    can be 
-    drag : {
-      targetId : 1,
-      originalMousePosition : {
-        x : 4, 
-        y : 6
-      },
-      originalTargetPosition : {
-        x : 2, 
-        y : 3
-      }
-    }
-  */
+
   circles : {
     ...createRandomCircle(),
     ...createRandomCircle(),
