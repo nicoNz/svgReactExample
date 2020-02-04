@@ -1,5 +1,12 @@
 import * as React from 'react'
+import RulerX from './RulerX'
+import RulerY from './RulerY'
 
+const CORNER = 70
+const SVG_WIDTH = 600
+const SVG_HEIGHT = 400
+const utilSpaceX =  SVG_WIDTH-CORNER
+const utilSpaceY = SVG_HEIGHT-CORNER 
 
 function onMouseDown(e, appState, setAppState) {
     e.persist()
@@ -10,6 +17,13 @@ function onMouseDown(e, appState, setAppState) {
     } = e
 
     const id = e.target.dataset.id
+    if(!id) {
+        return
+    }
+    const circle = appState.circles[id]
+    if(!circle) {
+        return
+    }
 
     const targetedCirclePosition = appState.circles[id].position
 
@@ -29,16 +43,19 @@ function onMouseDown(e, appState, setAppState) {
     })
 }
 
-function onMouseDrag(e, appState, setAppState) {
-    const drag = appState.drag
+function onMouseDrag(e, appState, setAppState, scale) {
 
     const {
-        originalMousePosition,
-        originalTargetPosition,
-        targetId
-    } = drag
+        drag : {
+            originalMousePosition,
+            originalTargetPosition,
+            targetId
+        },
+        circles
+    } = appState
 
-    const target = appState.circles[targetId]
+
+    const target = circles[targetId]
 
     const {
         clientX,
@@ -46,8 +63,8 @@ function onMouseDrag(e, appState, setAppState) {
     } = e
 
     const vec = {
-        x : clientX - originalMousePosition.x,
-        y : clientY - originalMousePosition.y,
+        x : (clientX - originalMousePosition.x)/(utilSpaceX/scale.scaleX),
+        y : (clientY - originalMousePosition.y)/(utilSpaceY/scale.scaleY),
     }
 
     setAppState({
@@ -72,9 +89,9 @@ function onMouseUp(e, appState, setAppState) {
     })
 }
 
-function onMouseMove(e, appState, setAppState) {
+function onMouseMove(e, appState, setAppState, scale) {
     if(appState.drag !== null) {
-        onMouseDrag(e, appState, setAppState)
+        onMouseDrag(e, appState, setAppState, scale)
     }
 }
 
@@ -88,25 +105,55 @@ const MySvg = ({
         drag,
         circles
     } = appState
+
+
+    const [scale, setScale] = React.useState({
+        scaleX : 20,
+        offsetX : 10,
+        scaleY : 10,
+        offsetY : 15,
+    })
+
+
     return (
         <svg 
-            width="600" height="400"
-            onMouseDown={e=>onMouseDown(e, appState, setAppState)}
-            onMouseMove={e=>onMouseMove(e, appState, setAppState)}
+            width={SVG_WIDTH} height={SVG_HEIGHT}
+            onMouseDown={e=>onMouseDown(e, appState, setAppState, scale)}
+            onMouseMove={e=>onMouseMove(e, appState, setAppState, scale)}
             onMouseUp={e=>onMouseUp(e, appState, setAppState)}
         >
-            {
-                Object.values(circles).map(circle=>(
-                    <circle 
-                        cx={circle.position.x}
-                        cy={circle.position.y}
-                        r = "30"
-                        fill={circle.color}
-                        key={circle.id}
-                        data-id={circle.id}
-                    />
-                ))
-            }
+            <g transform={`translate(70, 70) scale(${utilSpaceX} ${utilSpaceY})`}>
+                <g>
+                    <RulerX from={scale.offsetX} to={scale.offsetX+scale.scaleX} />
+                </g>
+                <g>
+                    <RulerY from={scale.offsetY} to={scale.offsetY+scale.scaleY}/>    
+                </g>
+                <g transform={`scale(${1./scale.scaleX} ${1./scale.scaleY}) translate(${-scale.offsetX} ${-scale.offsetY}) `}>
+                    {
+                        Object.values(circles).map(({
+                            position : {
+                                x,
+                                y
+                            },
+                            color,
+                            id
+                        })=>(
+                            <circle 
+                                cx={x}
+                                cy={y}
+                                r=".2"
+                                
+                                fill={color}
+                                key={id}
+                                data-id={id}
+
+                            />
+                        ))
+                    }
+                </g>
+            </g>
+            
         </svg>
     )
 }

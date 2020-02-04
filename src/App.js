@@ -27,8 +27,8 @@ function createRandomCircle() {
       id,
       color : createRandomColor(),
       position : {
-        x : Math.random()*CANVAS_WIDTH, 
-        y : Math.random()*CANVAS_HEIGHT
+        x : Math.random()*20+10, 
+        y : Math.random()*20+10
       },
       data : {
         things : Math.random()*10,
